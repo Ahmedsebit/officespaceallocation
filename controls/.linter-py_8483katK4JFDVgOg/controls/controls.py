@@ -1,0 +1,2 @@
+class AmityControls():
+    pass
