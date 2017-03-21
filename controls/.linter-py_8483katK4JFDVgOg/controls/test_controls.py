@@ -1,6 +1,6 @@
 import unittest
 from unittest import TestCase
-from models import Amity, Room, Office, LivingSpace, Person, Fellow, Staff
+from controls import AmityControls
 
 class AmityControlTest(TestCase):
 
@@ -44,11 +44,11 @@ class AmityControlTest(TestCase):
         AmityControls.add_person('Ahmed', 'Staff', 'Y')
         self.assertNotEqual('Staff')
 
-    def test_invalid input_person(self):
+    def test_invalid_input_person(self):
         AmityControls.add_person(1, 2, 3)
         raise TypeError('Invalid Input')
 
-    def test_invalid input_room(self):
+    def test_invalid_input_room(self):
         AmityControls.create_room(1, 2)
         raise TypeError('Invalid Input')
 
