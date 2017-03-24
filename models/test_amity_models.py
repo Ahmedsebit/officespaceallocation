@@ -1,6 +1,6 @@
 import unittest
 from unittest import TestCase
-from models import Amity, Room, Office, LivingSpace, Person, Fellow, Staff
+from amity_models import Amity, Room, Office, LivingSpace, Person, Fellow, Staff
 
 class AmityModelTest(TestCase):
 
@@ -14,7 +14,7 @@ class AmityModelTest(TestCase):
         issubclass(Fellow, Person)
 
     def test_staff_inheritance(self):
-        issubclass(Person, Staff)
+        self.assertTrue(issubclass(Staff, Room), msg="staff not inheriting")
 
     def test_office_maximum_number(self):
         office = Office()

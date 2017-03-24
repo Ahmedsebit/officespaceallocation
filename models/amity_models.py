@@ -3,7 +3,7 @@ class Amity(object):
         pass
 
 class Room(object):
-    def __init__(self, room_type, maximum_number):
+    def __init__(self, room_type, maximum_capacity):
         pass
 
 class Office(Room):
