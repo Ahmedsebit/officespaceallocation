@@ -38,8 +38,3 @@ class AmityControls():
     def print_room(self, name):
         selected_room = {k: v for k, v in self.all_allocations.items() if v[0] == name}
         return selected_room
-
-
-
-# amity = AmityControls()
-# amity.load_people('/Users/ahmedyusuf/desktop/CP1AOfficeSpaceAllocation/officespaceallocation/files/person.txt')

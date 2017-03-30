@@ -56,12 +56,6 @@ class AmityControlTest(TestCase):
         self.amity.add_person('T', 'S', 'Staff', 'Y')
         self.assertNotEqual(self.amity.all_persons['T S'], 'Staff', msg="Cannot allocate staff a room")
 
-    # def test_invalid_input_person(self):
-    #     #self.amity.add_person("1", "2", 3, 'Y')
-    #     #person = self.amity.all_persons[1]
-    #     #self.assertTrue(TypeError)
-    #     pass
-
     def test_invalid_input_room(self):
         '''Test for wrong room input'''
         self.amity.create_room(1, 2)
@@ -74,15 +68,6 @@ class AmityControlTest(TestCase):
         self.amity.load_people('/Users/ahmedyusuf/desktop/person.txt')
         NewSpaces = len(self.amity.all_allocations)
         self.assertEqual(CurrentSpaces + 1, NewSpaces, msg="Loading failed")
-
-    # def test_print_unallocated(self):
-    #     pass
-    #
-    # def test_check_for_proper_output(self):
-    #     pass
-    #
-    # def test_print_room(self):
-    #     pass
 
 
 
