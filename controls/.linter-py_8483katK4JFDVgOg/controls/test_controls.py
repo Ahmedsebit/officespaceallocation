@@ -1,6 +1,5 @@
 import unittest
 import sys
-sys.path.insert(0, '/Users/ahmedyusuf/desktop/CP1AOfficeSpaceAllocation/officespaceallocation/controls')
 from unittest import TestCase
 from amity_controls import AmityControls
 
@@ -10,8 +9,7 @@ class AmityControlTest(TestCase):
 
     def test_if_room_exists(self):
         '''Test for searching if room exists'''
-        self.assertTrue('K' in self.amity.all_rooms, msg="Room does not exist")
-
+        self.assertTrue('Kinshasa' in self.amity.all_rooms, msg="Room does not exist")
 
     def test_create_room(self):
         '''Test for succesfull room created'''
@@ -22,12 +20,12 @@ class AmityControlTest(TestCase):
 
     def test_invalid_roomtype(self):
         '''Test for checking the created room type'''
-        self.amity.create_room('Adis Ababa', 'Off')
-        self.assertEqual(self.amity.all_rooms['Adis Ababa'], "Office", msg="Invalid Room Type")
+        self.amity.create_room('Adis Ababa', 1)
+        self.assertEqual(self.amity.all_rooms['Adis Ababa'], "Office", msg="Wrong Room Type")
 
     def test_if_person_exist(self):
         '''Test for searching if person exists'''
-        self.assertTrue('A' in self.amity.all_allocations, msg="Person doe not exists")
+        self.assertTrue('Timothy Ngugi' in self.amity.all_persons, msg="Person does not exists")
 
 
     def test_add_person(self):
@@ -55,12 +53,6 @@ class AmityControlTest(TestCase):
         '''Test for wrong living space allocation'''
         self.amity.add_person('T', 'S', 'Staff', 'Y')
         self.assertNotEqual(self.amity.all_persons['T S'], 'Staff', msg="Cannot allocate staff a room")
-
-    def test_invalid_input_room(self):
-        '''Test for wrong room input'''
-        self.amity.create_room(1, 2)
-        room = self.amity.all_rooms[1]
-        self.assertFalse(isinstance(room, int), msg="Invalid input")
 
     def test_load_people(self):
         '''Test for succesfull room created'''

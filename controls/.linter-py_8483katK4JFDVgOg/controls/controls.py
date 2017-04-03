@@ -1,10 +1,9 @@
 import sys
 import random
-sys.path.insert(0, '/Users/ahmedyusuf/desktop/CP1AOfficeSpaceAllocation/officespaceallocation/controls')
 
 class AmityControls():
     def __init__(self):
-        self.all_persons = {"Ahmed Yusuf":"Fellow", "Yusuf":"Staff"}
+        self.all_persons = {"Ahmed Yusuf":"Fellow", "Yusuf":"Staff", "T MK":"Fellow"}
         self.all_rooms = {"Kigali":"Office","Krypton":"Living Space","Kampala":"Office","Gotham":"Living Space"}
         self.all_allocations = {"Ahmed Yusuf":["Kigali","Krypton"],"Yusuf Sebit":["Kampala"],"T MK":["Kampala","Gotham"]}
         self.selected_room = {}
