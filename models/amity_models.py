@@ -1,38 +1,33 @@
-
-import os
-import sys
-
-
-class Amity(object):
-    def __init__(self):
-        pass
+""" Class Amity Creation"""
 
 class Room(object):
+    """ Class Amity Creation"""
     def __init__(self, room_type, maximum_capacity):
         pass
 
 class Office(object):
+    """ Class Amity Creation"""
     def __init__(self):
         self.maximum_capacity = 0
         self.room_type = ""
-        pass
 
 class LivingSpace(object):
+    """ Class Amity Creation"""
     def __init__(self):
         self.maximum_capacity = 0
         self.room_type = ""
-        pass
 
 class Person(object):
-    def __init__(self, con_type):
+    """ Class Amity Creation"""
+    def __init__(self, person_type):
         pass
 
 class Fellow(object):
+    """ Class Amity Creation"""
     def __init__(self):
-        self.con_type = ""
-        pass
+        self.person_type = ""
 
 class Staff(object):
+    """ Class Amity Creation"""
     def __init__(self):
-        self.con_type = ""
-        pass
+        self.person_type = ""
