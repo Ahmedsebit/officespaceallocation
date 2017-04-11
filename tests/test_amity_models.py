@@ -52,7 +52,7 @@ class AmityModelTest(TestCase):
         The return value. True for Fellow, False otherwise.
         '''
         fellow = Fellow()
-        self.assertEqual(fellow.person_type, "Fellow",
+        self.assertEqual(fellow.person_type, "FELLOW",
                          msg="Fellow person-type has not been set to Fellow")
 
     def test_staff_person_type(self):
@@ -62,7 +62,7 @@ class AmityModelTest(TestCase):
         The return value. True for Staff, False otherwise.
         '''
         staff = Staff()
-        self.assertEqual(staff.person_type, "Staff",
+        self.assertEqual(staff.person_type, "STAFF",
                          msg="Staff person-type has not been set to Staff")
 
 

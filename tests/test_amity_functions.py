@@ -18,7 +18,7 @@ class AmityControlTest(TestCase):
         True - if data has been loaded (Anity dictionary has items loaded to it)
         False and fails - if data hasn't been loaded
         '''
-        self.assertEqual(self.amity.load_state(), 'System Loaded', msg='Loading Failed')
+        self.assertEqual(self.amity.load_state(), 'System loaded')
 
 
     def test_createroom(self):
@@ -28,7 +28,7 @@ class AmityControlTest(TestCase):
         False & Fails - If room creation fails (Length of room remains the same)
         '''
         self.assertEqual(self.amity.create_room('London', 'OFFICE'),
-                         'Room succefully created', msg="Room not created")
+                         'Room succefully created')
 
 
     def test_createroom_room_exists(self):
@@ -38,7 +38,7 @@ class AmityControlTest(TestCase):
         '''
         self.amity.create_room('London', 'OFFICE')
         self.assertEqual(self.amity.create_room('London', 'OFFICE'),
-                         'Room already exists', msg="Room already exist")
+                         'Room already exists')
 
 
     def test_create_room_invalid_roomtype(self):
@@ -67,7 +67,7 @@ class AmityControlTest(TestCase):
         False & Fails - If person creation fails (Length of room remains the same)
         '''
         self.assertEqual(self.amity.add_person('Timothy', 'Ngugi', 'FELLOW', 'Y'),
-                         'Person Succesfully Added', msg="Person already exists")
+                         'Person Succesfully Added')
 
 
     def test_add_person_invalid_persontype(self):
@@ -77,7 +77,7 @@ class AmityControlTest(TestCase):
         '''
         self.amity.add_person('Timothy', 'Ngugi', 'FELLO', 'Y')
         self.assertEqual(self.amity.add_person('Timothy', 'Ngugi', 'FELLO', 'Y'),
-                         'Wrong person type, should be FELLOW or STAFF', msg="Wrong Person Type")
+                         'Wrong person type, should be FELLOW or STAFF')
 
 
     def test_allocate_room_fellowall(self):
@@ -126,8 +126,8 @@ class AmityControlTest(TestCase):
         True - If relocation is succesful (The name of the allocated room changes)
         False and Fails - If relocation fails (The name of the allocated room remains the same)
         '''
-        self.amity.allocate_room('Fellow Three', 'OFFICE', 'OfficeTwo')
-        self.assertEqual(self.amity.relocate_office('Fellow Three', 'OFFICE', 'OfficeThree'),
+        self.amity.add_person('A', 'Y', 'FELLOW', 'Y')
+        self.assertEqual(self.amity.relocate_office('A', 'Y', 'OFFICE', 'OfficeThree'),
                          'Relocation succesful')
 
 
@@ -138,7 +138,7 @@ class AmityControlTest(TestCase):
         False and Fails - If dictionary length doesn't increase by number of lines in the text files
         '''
         self.assertEqual(self.amity.load_people('person.txt'),
-                         'Loading succesful', msg="Loading failed")
+                         'Loading succesful')
 
     def test_load_people_invalidfile(self):
         '''
@@ -146,17 +146,9 @@ class AmityControlTest(TestCase):
         True - If allocations dictionary length increases by number of lines in the text files
         False and Fails - If dictionary length doesn't increase by number of lines in the text files
         '''
-        self.assertEqual(self.amity.load_people('person_invalid.txt'),
-                         'Loading Failed, Invalid failed', msg="Loading failed")
+        with self.assertRaises(IndexError):
+            self.amity.load_people('person_invalid.txt')
 
-    def test_load_people_emptyfile(self):
-        '''
-        Function for checking loading persons from text files
-        True - If allocations dictionary length increases by number of lines in the text files
-        False and Fails - If dictionary length doesn't increase by number of lines in the text files
-        '''
-        self.assertEqual(self.amity.load_people('person_empty.txt'),
-                         'Loading Failed, empty file')
 
     def test_load_people_nofile(self):
         '''
@@ -164,7 +156,8 @@ class AmityControlTest(TestCase):
         True - If allocations dictionary length increases by number of lines in the text files
         False and Fails - If dictionary length doesn't increase by number of lines in the text files
         '''
-        self.assertRaises(self.amity.load_people('person_notexisting.txt'), OSError)
+        with self.assertRaises(IOError):
+            self.amity.load_people('person_notexisting.txt')
 
 
 

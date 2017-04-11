@@ -1,95 +1,113 @@
 """ Import module for random item selection"""
 import os
 import random
-from models.amity_models import Amity, Office, LivingSpace, Person, Fellow, Staff
+from models.amity_models import Amity
+from models.amity_room_models import Room, Office, LivingSpace
+from models.amity_person_models import Person, Fellow, Staff
 
 class AmityControls(object):
     """ Class AmityControls creation"""
-    def __init__(self):
 
-        self.office = Office()
-        self.livingspace = LivingSpace()
+    def __init__(self):
+        self.people = []
         self.amity = Amity()
-        self.fellows = Fellow()
-        self.staff = Staff()
-        self.all_fellows = self.fellows.all_Fellows
-        self.all_staff = self.staff.all_Staff
-        self.all_allocations = self.amity.all_allocations
-        self.all_offices = self.office.all_Offices
-        self.all_livingspaces = self.livingspace.all_Livingspaces
+        self.rooms = self.amity.all_rooms
+        self.persons = self.amity.all_persons
 
     def load_state(self):
-        """ Loading state function """
-        pass
-
+        return 'System loaded'
 
     def create_room(self, room_name, room_type):
-        """ Room creation function"""
-        if room_type == 'OFFICE':
-            if room_name in self.all_offices:
-                return 'Room already exists'
-            else:
-                self.all_offices.update({room_name:0})
-                return 'Room succefully created'
-        elif room_type == 'LIVING SPACE':
-            if room_name in self.all_livingspaces:
-                return 'Room already exists'
-            else:
-                self.all_livingspaces.update({room_type:0})
-                return 'Room succefully created'
+        h = [x.room_name for x in self.rooms]
+        if room_name.upper() in h:
+            return 'Room exists'
         else:
-            return 'Invalid room type, Should be OFFICE or LIVING SPACE'
+            if room_type.upper() == 'OFFICE':
+                self.rooms.append(Office(room_name.upper()))
+                return 'Room succesfully created'
+            elif room_type.upper() == 'LIVING SPACE':
+                self.rooms.append(LivingSpace(room_name.upper()))
+                'Room succesfully created'
+            else:
+                return 'Invalid room type'
 
 
     def add_person(self, fname, lname, role, accom):
-        """ Add and allocate person function """
         name = fname+ " "+lname
-        office = random.choice(list(self.all_offices))
-        livingspace = random.choice(list(self.all_livingspaces))
-        if role == 'FELLOW':
-            if name in self.all_fellows:
+        n = [x.person_name for x in self.persons]
+        if role.upper() == 'FELLOW':
+            if name in n:
                 return 'The person already exists'
             else:
-                self.all_fellows.append(name)
+                self.persons.append(Fellow(name.upper()))
+                # self.allocate_room(name, role, accom)
                 return 'Person Succesfully Added'
-        elif role == 'STAFF':
-            self.all_staff.append(name)
-            return 'STAFF succesfully added'
+        elif role.upper() == 'STAFF':
+            if name in n:
+                self.persons.append(Staff(name.upper()))
+                # self.allocate_room(name, role, accom)
+                return 'STAFF succesfully added'
         elif role != 'STAFF' or role != 'FELLOW':
             return 'Wrong person type, should be FELLOW or STAFF'
-        allocate_room(self, name, role, accom)
+        allocate_room(name, rome, accom)
+
 
     def allocate_room(self, name, role, accom):
-        office = random.choice(list(self.all_offices))
-        livingspace = random.choice(list(self.all_livingspaces))
-        if role == 'FELLOW':
-            if accom == 'Y':
-                self.all_allocations.update({name:[office, livingspace]})
+        offices = [x for x in self.rooms if x.room_type == 'OFFICE'
+                   and x.capcity > len(x.occupants)]
+        livingspaces = [x for x in self.rooms if x.room_type == 'LIVING SPACE'
+                        and x.capcity > len(x.occupants)]
+        if len(office) < 1 and len(livingspaces) < 1:
+            return 'No rooms are available'
+        elif len(office) > 1 and len(livingspace) < 1:
+            return 'No living spaces are available'
+            office = random.choice(list(offices))
+            if role == 'FELLOW':
+                office.occupants.append(Fellow(name.upper()))
                 return 'Office and Living Space succesfully allocated'
-            elif accom == 'N':
-                self.all_allocations.update({name:[office]})
-            return 'Office succesfully allocated'
-        elif role == 'STAFF':
-            if accom == 'Y':
-                self.all_allocations.update({name:[office]})
+            elif role == 'STAFF':
+                office.occupants.append(Staff(name.upper()))
                 return 'Office Succesfully allocated. Cannot allocate staff a living space'
-            else:
-                self.all_allocations.update({name:[office]})
-                return 'STAFF succesfully allocated'
-        elif role != 'STAFF' or role != 'FELLOW':
-            return 'Invalid person role'
-        pass
+        elif len(office) < 1 and len(livingspace) < 1:
+            return 'No offices are available'
+            livingspace = random.choice(list(livingspaces))
+            if role == 'FELLOW':
+                if accom == 'Y':
+                    livingspace.occupants.append(Fellow(name.upper()))
+                    return 'Living Space succesfully allocated'
+            elif role == 'STAFF':
+                return 'Cannot allocate staff a living space'
+        else:
+            office = random.choice(list(offices))
+            livingspace = random.choice(list(livingspaces))
+            if role == 'FELLOW':
+                if accom == 'Y':
+                    office.occupants.append(Fellow(name.upper()))
+                    livingspace.occupants.append(Fellow(name.upper()))
+                    return 'Office and Living Space succesfully allocated'
+                elif accom == 'N':
+                    office.occupants.append(Fellow(name.upper()))
+                return 'Office succesfully allocated'
+            elif role == 'STAFF':
+                if accom == 'Y':
+                    office.occupants.append(Staff(name.upper()))
+                    return 'Office Succesfully allocated. Cannot allocate staff a living space'
+                else:
+                    office.occupants.append(Staff(name.upper()))
+                    return 'STAFF succesfully allocated'
+            elif role != 'STAFF' or role != 'FELLOW':
+                return 'Invalid person role'
 
 
-    def relocate_office(self, name, reloc_type, room_name):
-        """ Rellocate person function """
-
-        if name in self.all_fellows:
+    def relocate_office(self, fname, lname, reloc_type, room_name):
+        name = fname + " " +lname
+        n = [x.person_name for x in self.persons]
+        if name in n:
             if reloc_type == 'OFFICE':
                 self.all_allocations[name][0] = room_name
                 return 'Relocation succesful'
             elif reloc_type == 'LIVING SPACE':
-                self.all_allocations[person][1] = room_name
+                self.all_allocations[name][1] = room_name
                 return 'Relocation succesful'
             else:
                 return 'wrong room type. Should be OFFICE  or LIVING SPACE'
@@ -106,19 +124,21 @@ class AmityControls(object):
 
 
     def load_people(self, text_input):
-        """ Load and relocate person function """
         try:
             myfile = open(text_input, 'r')
+        except IOError:
+            return 'Input Error'
+        except OSError:
+            return "OS error"
+        except IndexError:
+            raise 'Invalid file'
+        else:
             for line in myfile:
                 item = line.split()
-                if len(item) < 1:
-                    return 'Loading Failed, empty file'
-                elif len(item) < 4 or len(item) > 4:
-                    return 'Loading Failed, Invalid failed'
-                else:
-                    self.add_person(item[0], item[1], item[2], item[3])
-        except Exception as e:
-            raise OSError
+                self.add_person(item[0], item[1], item[2], item[3])
+            return 'Loading succesful'
+
+
 
 
     def print_room(self, name):
