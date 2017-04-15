@@ -1,57 +1,69 @@
-import os, sys
-sys.path.insert(0, os.path.abspath(".."))
-
+''' Importing unittest '''
 import unittest
 from unittest import TestCase
-from amity_app.models.amity_models import Amity, Room, Office, LivingSpace, Person, Fellow, Staff
+from models.amity_models import Office, LivingSpace, Fellow, Staff
 
 class AmityModelTest(TestCase):
-
-    def test_office_inheritance(self):
-        '''Testing if Office is a subclass of Room'''
-        self.assertTrue(issubclass(Office, Room), msg="Office not a subclass of Room")
-
-    def test_livingspace_inheritance(self):
-        '''Testing if LivingSpace is a subclass of Room'''
-        self.assertTrue(issubclass(LivingSpace, Room), msg="LivingSpace not a subclass of Room")
-
-    def test_fellow_inheritance(self):
-        '''Testing if Fellow is a subclass of Person'''
-        self.assertTrue(issubclass(Fellow, Person), msg="Felow not a subclass of Person")
-
-    def test_staff_inheritance(self):
-        '''Testing if Staff is a subclass of Person'''
-        self.assertTrue(issubclass(Staff, Room), msg="Staff not a subclass of Person")
+    """ Class AmityModelTest Creation"""
 
     def test_office_maximum_number(self):
-        '''Testing for Office maximum number'''
+        '''
+        Function for checking Office maximum number
+        Returns:
+        The return value. True for 6, False otherwise.
+        '''
         office = Office()
         self.assertEqual(office.maximum_capacity, 6, msg="Office maximum capacity has not set to 6")
 
     def test_livingspace_maximum_number(self):
-        '''Testing for LivingSpace maximum number'''
+        '''
+        Function for checking Living Space maximum number
+        Returns:
+        The return value. True for 4, False otherwise.
+        '''
         livingspace = LivingSpace()
-        self.assertEqual(livingspace.maximum_capacity, 4, msg="LivingSpace maximum capacity has not set to 4")
+        self.assertEqual(livingspace.maximum_capacity, 4,
+                         msg="LivingSpace maximum capacity has not set to 4")
 
     def test_office_room_type(self):
-        '''Testing for Office room-type'''
+        '''
+        Function for validating Office room_type
+        Returns:
+        The return value. True for Office, False otherwise.
+        '''
         office = Office()
-        self.assertEqual(office.room_type, "Office", msg="Office room-type has not been set to Office")
+        self.assertEqual(office.room_type, "Office",
+                         msg="Office room-type has not been set to Office")
 
     def test_livingspace_room_type(self):
-        '''Testing for LivingSpace room-type'''
+        '''
+        Function for validating Office room_type
+        Returns:
+        The return value. True for Living Space, False otherwise.
+        '''
         livingspace = LivingSpace()
-        self.assertEqual(livingspace.room_type, "Living Space", msg="LivingSpace room-type has not been set to Living Space")
+        self.assertEqual(livingspace.room_type, "Living Space",
+                         msg="LivingSpace room-type has not been set to Living Space")
 
-    def test_fellow_con_type(self):
-        '''Testing for Fellow person-type'''
+    def test_fellow_person_type(self):
+        '''
+        Function for validating Fellow person_type
+        Returns:
+        The return value. True for Fellow, False otherwise.
+        '''
         fellow = Fellow()
-        self.assertEqual(fellow.con_type, "Fellow", msg="Fellow person-type has not been set to Fellow")
+        self.assertEqual(fellow.person_type, "FELLOW",
+                         msg="Fellow person-type has not been set to Fellow")
 
-    def test_staff_con_type(self):
-        '''Testing for Staff person-type'''
+    def test_staff_person_type(self):
+        '''
+        Function for validating Staff person_type
+        Returns:
+        The return value. True for Staff, False otherwise.
+        '''
         staff = Staff()
-        self.assertEqual(staff.con_type, "Staff", msg="Staff person-type has not been set to Staff")
+        self.assertEqual(staff.person_type, "STAFF",
+                         msg="Staff person-type has not been set to Staff")
 
 
 if __name__ == '__main__':
