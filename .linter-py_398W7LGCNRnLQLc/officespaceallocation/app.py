@@ -2,11 +2,13 @@
 This example uses docopt with the built in cmd module to demonstrate an
 interactive command application.
 Usage:
+    app load_state
     app create_room <room_type> <room_name>...
     app add_person <person_type> <first_name> <last_name> [<want_accomodation>]
     app print_room <room_name>
-    app load_state <file_name>
-    app print_unallocated_people
+    app print_unallocated
+    app relocate_person <first_name> <last_name> [<room_name>]
+    app save_state
     app (-i | --interactive)
     app (-h | --help)
 Options:
@@ -53,9 +55,9 @@ def docopt_cmd(func):
 
 
 
-class MyInteractive (cmd.Cmd):
+class MyInteractive(cmd.Cmd):
     amity_controls = AmityControls()
-    cprint(figlet_format("Amity", font="nipples"), "cyan", attrs=['bold'])
+    cprint(figlet_format("Amity", font="isometric4"), attrs=['bold'])
     prompt = '(app) '
     file = None
     print(__doc__)
@@ -67,7 +69,7 @@ class MyInteractive (cmd.Cmd):
         """Usage: create_room <room_type> <room_name>..."""
         room_type = args['<room_type>'].upper()
         for name in args['<room_name>']:
-            room_name = args['<room_name>'] [args['<room_name>'].index(name)]
+            room_name = args['<room_name>'][args['<room_name>'].index(name)]
             self.amity_controls.create_room(room_name, room_type)
 
 
@@ -76,11 +78,26 @@ class MyInteractive (cmd.Cmd):
 
         """Usage: add_person <person_type> <first_name> <last_name> [<want_accomodation>]"""
         person_type = args['<person_type>'].upper()
-        first_name = args['<first_name>']
-        last_name = args['<last_name>']
+        first_name = args['<first_name>'].upper()
+        last_name = args['<last_name>'].upper()
         want_accommodation = args['<want_accomodation>']
+        if want_accommodation == '':
+            person_name = first_name + " " + last_name
+            self.amity_controls.add_person(first_name, last_name, person_type, 'N')
+        else:
+            person_name = first_name + " " + last_name
+            want_accommodation = args['<want_accomodation>']
+            self.amity_controls.add_person(first_name, last_name, person_type, want_accommodation)
+
+    @docopt_cmd
+    def do_relocate_person(self, args):
+
+        """Usage: relocate_person <first_name> <last_name> [<room_name>]"""
+        first_name = args['<first_name>'].upper()
+        last_name = args['<last_name>'].upper()
+        room_name = args['<room_name>']
         person_name = first_name + " " + last_name
-        self.amity_controls.add_person(first_name, last_name, person_type, want_accommodation)
+        self.amity_controls.relocate_person(first_name, last_name, room_name)
 
 
     @docopt_cmd
@@ -90,27 +107,43 @@ class MyInteractive (cmd.Cmd):
         room_name = arg['<room_name>']
         self.amity_controls.print_room(room_name)
 
+    @docopt_cmd
+    def do_print_unallocated(self, arg):
+        """Usage: print_unallocated """
+        self.amity_controls.print_unallocated()
+
 
     @docopt_cmd
     def do_load_state(self, arg):
+
         """Usage: load_state """
         self.amity_controls.load_state()
 
+    @docopt_cmd
+    def do_save_state(self, arg):
+
+        """Usage: save_state """
+        self.amity_controls.save_state()
 
     def do_quit(self, args):
 
         """Quits out of Interactive Mode."""
-
         print('Good Bye!')
         exit()
+
+
+
 
 
 opt = docopt(__doc__, sys.argv[1:])
 
 
 
+
+
 if opt['--interactive']:
     MyInteractive().cmdloop()
+
 
 
 print(opt)
