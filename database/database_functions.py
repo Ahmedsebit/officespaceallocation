@@ -1,65 +1,96 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from database.database_models import Persons, Rooms, Allocations, BASE
+from database.database_models import Persons, Rooms, BASE
 
-ENGINE = create_engine('sqlite:///amity.db')
-BASE.metadata.create_all(ENGINE)
-DBSESSION = sessionmaker(bind=ENGINE)
-SESSIONS = DBSESSION()
+
 
 class AmityDatabase(object):
+
     '''
-    This class contains functions hwich are used for database
-    functions.
+    class contains function for the database
     '''
 
-    def get_persons(self):
-        persons = SESSIONS.query(Persons).all()
+    def __init__(self):
+        pass
+
+    def initialize(self, filename):
+        '''
+        The function initaializes the database through a new databse or an existing database.
+        '''
+        self.ENGINE = create_engine('sqlite:///'+filename)
+        BASE.metadata.create_all(self.ENGINE)
+        self.DBSESSION = sessionmaker(bind=self.ENGINE)
+        self.SESSIONS = self.DBSESSION()
+
+    def get_persons(self, filename):
+        '''
+        The function get the person from database and add the person to a dictionary
+        '''
+        # calling the initialize function to use the specified the database
+        self.initialize(filename)
+        persons = self.SESSIONS.query(Persons).all()
         person_dictionary = {}
         for person in persons:
             person_dictionary.update({person.person_name:person.person_type})
         return person_dictionary
 
-    def get_rooms(self):
-        rooms = SESSIONS.query(Rooms).all()
+    def get_rooms(self, filename):
+        '''
+        The function get the rooms from database and add the rooms to the dictionary with regards
+        to room name and room type to a dictionary
+        '''
+        # calling the initialize function to use the specified the database
+        self.initialize(filename)
+        rooms = self.SESSIONS.query(Rooms).all()
         room_dictionary = {}
         for room in rooms:
             room_dictionary.update({room.room_name:room.room_type})
         return room_dictionary
 
-    def get_allocations(self):
-        allocations = SESSIONS.query(Allocations).all()
-        allocation_dictionary = {}
+    def get_allocations(self, filename):
+        '''
+        The function get the allocations from database and adds the allocations to the dictionary
+        with regards to person name and person type and the room they belong to into a dictionary.
+        '''
+        # calling the initialize function to use the specified the database
+        self.initialize(filename)
+        allocations = self.SESSIONS.query(Persons).all()
+        allocations_dictionary = {}
         for allocation in allocations:
-            allocation_dictionary.update({allocation.person_name:
-                                          [allocation.office_name, allocation.livingspace_name]})
-        return allocation_dictionary
+            allocations_dictionary.update({allocation.person_name:[allocation.office_name,
+                                                                   allocation.livingspace_name]})
+        return allocations_dictionary
+
+    def add_person(self, filename, person_name, person_type, office_name, livingspace_name):
+        '''
+        The function is used to add the person to the dictionary
+        '''
+        # calling the initialize function to use the specified the database
+        self.initialize(filename)
+        newperson = Persons(person_name=person_name, person_type=person_type,
+                            office_name=office_name, livingspace_name=livingspace_name)
+        self.SESSIONS.add(newperson)
+        self.SESSIONS.commit()
+
+    def add_room(self, filename, room_name, room_type):
+        '''
+        The function is used to add the rooms to the dictionary
+        '''
+        # calling the initialize function to use the specified the database
+        self.initialize(filename)
+        newuser = Rooms(room_name=room_name, room_type=room_type)
+        self.SESSIONS.add(newuser)
+        self.SESSIONS.commit()
 
 
-    def add_person(self, person_name, person_type):
-        ''' Adding a person to database'''
-        newperson = Persons(person_name=person_name, person_type=person_type)
-        SESSIONS.add(newperson)
-        SESSIONS.commit()
-
-    def add_room(self, room_name, room_type, room_capacity):
-        ''' Adding a room to database'''
-        newuser = Rooms(room_name=room_name, room_type=room_type, room_capacity=room_capacity)
-        SESSIONS.add(newuser)
-        SESSIONS.commit()
-
-
-    def add_allocation(self, person_name, office_name, livingspace_name):
-        ''' Updating allocations table '''
-        new_allocation = Allocations(person_name=person_name,
-                                     office_name=office_name, livingspace_name=livingspace_name)
-        SESSIONS.add(new_allocation)
-        SESSIONS.commit()
-
-    def update_allocation(self, person_name, office_name, livingspace_name):
-        ''' Updating allocations table '''
-        person = SESSIONS.query(Allocations).filter_by(person_name=person_name).one()
-        person.office_name = office_name
-        person.livingspace_name = livingspace_name
-        SESSIONS.add(person)
-        SESSIONS.commit()
+    def update_person(self, filename, person_name, office_name, livingspaces_name):
+        '''
+        The function is used to add the person to the dictionary
+        '''
+        # calling the initialize function to use the specified the database
+        self.initialize(filename)
+        reallocation = self.SESSIONS.query(Persons).filter_by(person_name=person_name).one()
+        reallocation.office_name = office_name
+        reallocation.livingspace_name = livingspaces_name
+        self.SESSIONS.add(reallocation)
+        self.SESSIONS.commit()

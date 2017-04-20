@@ -2,12 +2,13 @@
 This example uses docopt with the built in cmd module to demonstrate an
 interactive command application.
 Usage:
-    app load_state
-    app create_room <room_type> <room_name>...
+    app load_state <file_name>
+    app create_room <room_type> <room_name>
     app add_person <person_type> <first_name> <last_name> [<want_accomodation>]
     app print_room <room_name>
-    app print_unallocated
-    app relocate_person <first_name> <last_name> [<room_name>]
+    app print_unallocations [-o=filename]
+    app print_allocations [-o=filename]
+    app reallocate_person <first_name> <last_name> <room_name>
     app save_state
     app (-i | --interactive)
     app (-h | --help)
@@ -70,34 +71,34 @@ class MyInteractive(cmd.Cmd):
         room_type = args['<room_type>'].upper()
         for name in args['<room_name>']:
             room_name = args['<room_name>'][args['<room_name>'].index(name)]
-            self.amity_controls.create_room(room_name, room_type)
+            cprint(self.amity_controls.create_room(room_name, room_type))
 
 
     @docopt_cmd
     def do_add_person(self, args):
 
-        """Usage: add_person <person_type> <first_name> <last_name> [<want_accomodation>]"""
-        person_type = args['<person_type>'].upper()
+        """Usage: add_person <person_type> <first_name> <last_name> [<want_accomodation>] """
+        role = args['<person_type>'].upper()
         first_name = args['<first_name>'].upper()
         last_name = args['<last_name>'].upper()
-        want_accommodation = args['<want_accomodation>']
-        if want_accommodation == '':
-            person_name = first_name + " " + last_name
-            self.amity_controls.add_person(first_name, last_name, person_type, 'N')
+        if args['<want_accomodation>'] is None:
+            want_accommodation = 'N'
         else:
-            person_name = first_name + " " + last_name
-            want_accommodation = args['<want_accomodation>']
-            self.amity_controls.add_person(first_name, last_name, person_type, want_accommodation)
+            want_accommodation = args['want_accommodation']
+        cprint(self.amity_controls.add_person(first_name, last_name, role, want_accommodation))
+
+
 
     @docopt_cmd
-    def do_relocate_person(self, args):
+    def do_reallocate_person(self, args):
 
-        """Usage: relocate_person <first_name> <last_name> [<room_name>]"""
+        """Usage: reallocate_person <first_name> <last_name> <room_name>"""
         first_name = args['<first_name>'].upper()
         last_name = args['<last_name>'].upper()
         room_name = args['<room_name>']
         person_name = first_name + " " + last_name
-        self.amity_controls.relocate_person(first_name, last_name, room_name)
+        cprint(self.amity_controls.reallocate_person(first_name, last_name, room_name))
+
 
 
     @docopt_cmd
@@ -105,30 +106,39 @@ class MyInteractive(cmd.Cmd):
 
         """Usage: print_room <room_name>"""
         room_name = arg['<room_name>']
-        self.amity_controls.print_room(room_name)
+        cprint(self.amity_controls.print_room(room_name))
 
     @docopt_cmd
-    def do_print_unallocated(self, arg):
-        """Usage: print_unallocated """
-        self.amity_controls.print_unallocated()
+    def do_print_allocations(self, arg):
+        """Usage: print_allocations [<file_name>]"""
+        file_name = arg['<file_name>']
+        cprint(self.amity_controls.print_allocations(file_name))
+
+    @docopt_cmd
+    def do_print_unallocations(self, arg):
+        """Usage: print_unallocations <file_name>"""
+        file_name = arg['<file_name>']
+        cprint(self.amity_controls.print_unallocations(file_name))
 
 
     @docopt_cmd
     def do_load_state(self, arg):
 
-        """Usage: load_state """
-        self.amity_controls.load_state()
+        """Usage: load_state <file_name>"""
+        filename = arg['<file_name>']
+        cprint(self.amity_controls.load_state(filename))
 
     @docopt_cmd
     def do_save_state(self, arg):
 
-        """Usage: save_state """
-        self.amity_controls.save_state()
+        """Usage: save_state <file_name>"""
+        filename = arg['<file_name>']
+        cprint(self.amity_controls.save_state(filename))
 
     def do_quit(self, args):
 
         """Quits out of Interactive Mode."""
-        print('Good Bye!')
+        cprint('Good Bye!')
         exit()
 
 

@@ -19,17 +19,29 @@ class AmityControls(object):
         self.status = 0
 
 
-    def load_state(self):
-        # amity_database = AmityDatabase()
-        # initialize = Initialize()
-        # initialize.initialize_database(file_name)
-        # amity_database.initialize_database(file_name)
-        self.load_database()
+    def load_state(self, filename):
 
-
+        '''
+        This function loads the allocation application with data fom database
+        The function calls load_database function which query data from the database
+        and adds the data to the various lists in the application
+        '''
+        file_type = filename.split(".")
+        if len(file_type) == 2:
+            if file_type[1] == 'db':
+                self.load_database(filename)
+                return 'Loading state succesfull'
+            else:
+                return 'Loading state failed. Wrong file type'
+        else:
+            return 'Loading state failed. File type error'
 
 
     def create_room(self, room_name, room_type):
+        '''
+        This function creates room with respest to the room type.
+        The room is only created if the room does not exist and it has a valid room type
+        '''
         # creating a list of all room names to check if the room already exists
         all_rooms = [room.room_name for room in self.rooms]
         if room_name.upper() in all_rooms:
@@ -38,152 +50,156 @@ class AmityControls(object):
             if room_type.upper() == 'OFFICE':
                 room = Office(room_name.upper())
                 self.rooms.append(room)
-                print ('Room succesfully created')
-            elif room_type.upper() == 'LIVING SPACE':
+                return room.room_name + ' office succesfully created'
+            elif room_type.upper() == 'LIVINGSPACE':
                 room = LivingSpace(room_name.upper())
                 self.rooms.append(room)
-                print ('Room succesfully created')
+                return room.room_name + ' living space succesfully created'
             else:
-                print ('Invalid room type')
+                # if invalid room type was submitted
+                return 'Invalid room type'
 
 
-    def add_person(self, fname, lname, role, accom='N'):
-        name = fname+ " "+lname
+    def add_person(self, first_name, last_name, role, want_accommodation='N'):
+        '''
+        This functions adds person to the datase.
+        The erson is added and allocated a room by calling the office_allocation
+        or livingspace_allocation with repect to the eprson type and the choice for
+        accomodation.
+        '''
         # creating a list of all people names to check if the person already exists
         all_persons_names = [person.person_name for person in self.persons]
-        if role.upper() == 'FELLOW':
-            if name in all_persons_names:
-                return 'The person already exists'
-            else:
+        name = first_name+ " "+last_name
+        if name in all_persons_names:
+            return 'The person already exists'
+        else:
+            if role.upper() == 'FELLOW' and want_accommodation == 'N':
                 fellow = Fellow(name)
                 self.persons.append(fellow)
-                self.allocate_room(fellow, role, accom)
-                print ('Person Succesfully Added')
-        elif role.upper() == 'STAFF':
-            if name in all_persons_names:
-                print ('The person already exists')
-            else:
-                staff = Staff(name.upper())
+                self.allocate_office(fellow, fellow.person_type)
+                return fellow.person_name+ ' succesfully added'
+            elif role.upper() == 'FELLOW' and want_accommodation == 'Y':
+                fellow = Fellow(name)
+                fellow.want_accommodation = 'Y'
+                self.persons.append(fellow)
+                self.allocate_office(fellow, fellow.person_type)
+                self.allocate_livingspace(fellow, fellow.person_type)
+                return fellow.person_name+' succesfully added'
+            elif role.upper() == 'STAFF' and want_accommodation == 'N':
+                staff = Staff(name)
                 self.persons.append(staff)
-                self.allocate_room(staff, role, accom)
-                print ('STAFF succesfully added')
-        elif role != 'STAFF' or role != 'FELLOW':
-            print ('Wrong person type, should be FELLOW or STAFF')
-
-
-    def allocate_room(self, person, role, accom):
-        if len(self.rooms) == 0:
-            return 'no room has been created'
-        else:
-            # creating a list of all offices with available spaces
-            offices = [room for room in self.rooms if room.room_type == 'OFFICE'
-                       and room.capacity > len(room.occupants)]
-            # creating a list of all living spaces with available spaces
-            livingspaces = [room for room in self.rooms if room.room_type == 'LIVING SPACE'
-                            and room.capacity > len(room.occupants)]
-            # If there is no available space in both office and living space
-            if len(offices) == 0 and len(livingspaces) == 0:
-                return 'No avialable rooms'
-            # If there is no available living spaces only
-            elif len(offices) > 0 and len(livingspaces) == 0:
-                office = random.choice(list(offices))
-                if role.upper() == 'FELLOW':
-                    if accom == '':
-                        office.occupants.append(person)
-                        return 'Fellow allocated office'
-                    elif accom == 'Y':
-                        office.occupants.append(person)
-                        return 'Fellow allocated office. No available living spaces'
-                    else:
-                        office.occupants.append(person)
-                        return 'In valid accomodation choice. Fellow allocated office'
-                elif role.upper() == 'STAFF':
-                    if accom == '':
-                        office.occupants.append(person)
-                        return 'Person allocated room'
-                    elif accom == 'Y':
-                        office.occupants.append(person)
-                        return 'Person allocated office, cannot allocate staff a living space'
-                    else:
-                        return 'Invalid choice'
-                else:
-                    return 'Invalid role. Person not created'
-
-            # If there is no available space in offices only
-            elif len(offices) == 0 and len(livingspaces) > 0:
-                livingspace = random.choice(list(livingspaces))
-                if role.upper() == 'FELLOW':
-                    if accom.upper() == 'N':
-                        return 'Fellow not allocated office. No available offices'
-                    elif accom.upper() == 'Y':
-                        livingspace.occupants.append(person)
-                        return 'Fellow allocated living space. No available office'
-                    else:
-                        return 'In valid accomodation choice. Fellow not allocated room'
-                elif role.upper() == 'STAFF':
-                    if accom.upper() == 'N':
-                        return 'Staff not allocated office. No available offices'
-                    elif accom.upper() == 'Y':
-                        return 'Staff not allocated office. No available offices'
-                    else:
-                        return 'Invalid choice'
-                else:
-                    return 'Invalid role. Person not created'
-
-            # If there is available space in both office and living space
-            elif len(offices) > 0 and len(livingspaces) > 0:
-                office = random.choice(list(offices))
-                livingspace = random.choice(list(livingspaces))
-                if role.upper() == 'FELLOW':
-                    if accom.upper() == 'N':
-                        office.occupants.append(person)
-                        return 'Fellow allocated room'
-                    elif accom.upper() == 'Y':
-                        office.occupants.append(person)
-                        livingspace.occupants.append(person)
-                        return 'Fellow allocated room'
-                    else:
-                        return 'In valid accomodation choice. Fellow not allocated'
-                elif role.upper() == 'STAFF':
-                    if accom.upper() == 'N':
-                        office.occupants.append(person)
-                        return 'Person allocated room'
-                    elif accom.upper() == 'Y':
-                        office.occupants.append(person)
-                        return 'Person allocated office, cannot allocate staff a living space'
-                    else:
-                        return 'Invalid choice'
-                else:
-                    return 'Invalid role. Person not created'
+                self.allocate_office(staff, staff.person_type)
+                return staff.person_name+' succesfully added'
+            elif role.upper() == 'STAFF' and want_accommodation == 'Y':
+                staff = Staff(name)
+                self.persons.append(staff)
+                self.allocate_office(staff, staff.person_type)
+                return staff.person_name+\
+                ' succesfully Added to Office. Cannot allocate staff a livingspace'
+            elif role.upper() != 'STAFF' and role.upper() != 'FELLOW':
+                # if role is not STAFF or FELLOW
+                return 'Invalid role. Person not created'
 
 
 
+    def allocate_office(self, person, role):
+        '''
+        This function is used to allocate an office.
+        It checks if there is an office, then checks for a random office
+        with a if there is a vacant space.
+        '''
+        # creating a list of all offices with available spaces
+        offices = [room for room in self.rooms if room.room_type == 'OFFICE'
+                   and room.capacity > len(room.occupants)]
+        # If there is no available space in both office
+        if len(offices) == 0:
+            return 'No aviallable offices'
+        # If there is available office
+        elif len(offices) > 0:
+            office = random.choice(list(offices))
+            if role.upper() == 'FELLOW':
+                office.occupants.append(person)
+                return person.person_name+ ' added and allocated '+ office.room_name
+            elif role.upper() == 'STAFF':
+                office.occupants.append(person)
+                return person.person_name+ ' added and allocated '+office.room_name
+            else:
+                return 'Invalid role. Person not created'
 
-    def relocate_person(self, fname, lname, room_name):
+
+    def allocate_livingspace(self, person, role):
+        '''
+        This function is used to allocate an living space.
+        It checks if there is an office, then checks for a living space
+        with a if there is a vacant space. It laso checks for the person type
+        since STAFF cannot be allocated a living space
+        '''
+        # creating a list of all offices with available spaces
+        livingspaces = [room for room in self.rooms if room.room_type == 'LIVINGSPACE'
+                        and room.capacity > len(room.occupants)]
+        # If there is no available space in both office
+        if len(livingspaces) == 0:
+            return 'No aviallable living space'
+        # If there is available office
+        elif len(livingspaces) > 0:
+            livingspace = random.choice(list(livingspaces))
+            if role.upper() == 'FELLOW':
+                livingspace.occupants.append(person)
+                return person.person_name+ ' allocated '+livingspace.room_name
+            elif role.upper() == 'STAFF':
+                return 'Invalid choice, staff cannot be allocated a living space'
+            else:
+                return 'Invalid role. Person not allocated'
+
+
+
+    def reallocate_person(self, fname, lname, room_name):
+        '''
+        This function is used to reallocate person from a room they belonged to to a
+        specified room. The person is only relocated if they are not already allocated
+        the room and if the room has vacancy.
+        '''
         name = fname + " " +lname
         all_people_names = [person.person_name for person in self.persons]
         # cheking if person exists
-        if name in all_people_names:
+        if name.upper() in all_people_names:
             for room in self.rooms:
                 # getting the rooms the person belong to
                 person_list = [person.person_name for person in room.occupants]
-                input_room = [room for room in self.rooms if room.room_name == room_name]
-                if name in person_list:
-                    relocated_person = [person for person in room.occupants
-                                        if person.person_name == name]
-                    if input_room[0].capacity > len(input_room[0].occupants) and input_room[0].room_type == room.room_type:
-                        # adding the person to the room
-                        input_room[0].occupants.append(relocated_person[0])
-                        # removing the person from the previous room
-                        room.occupants.remove(relocated_person[0])
-                        return 'The person was allocated succesfully'
-                    else:
-                        return 'The person was not allocated'
+                input_room = [room for room in self.rooms if room.room_name == room_name.upper()]
+                if len(input_room) == 0:
+                    return 'the room does not exists'
+                else:
+                    persons_in_inputroom \
+                    = [person.person_name for person in input_room[0].occupants]
+                    if name in person_list:
+                        reallocated_person = [person for person in room.occupants
+                                              if person.person_name == name]
+                        if input_room[0].capacity > len(input_room[0].occupants) \
+                        and input_room[0].room_type == room.room_type:
+                            # adding the person to the room
+                            if name in persons_in_inputroom:
+                                return "The person already exists in the room"
+                            else:
+                                input_room[0].occupants.append(reallocated_person[0])
+                                # removing the person from the previous room
+                                room.occupants.remove(reallocated_person[0])
+                                return reallocated_person[0].person_name+\
+                                '  was reallocated succesfully from '+room.room_name +\
+                                ' to '+input_room[0].room_name
+                        else:
+                            return 'The person was not allocated'
         else:
             return 'Person doesnt exist'
 
 
-    def print_unallocated(self):
+
+    def unallocations(self, file_name):
+        '''
+        This function is used to create an file that has all unallocations.
+        This function is later used by print_unallocations functions to print all
+        unallocated persons.
+        '''
         person_name_list = [person.person_name for person in self.persons]
         person_in_room = []
         unallocated_persons = []
@@ -191,138 +207,219 @@ class AmityControls(object):
         for room in self.rooms:
             for person in room.occupants:
                 person_in_room.append(person.person_name)
-
+        file = open(file_name, 'w')
         for person in person_name_list:
             if person not in person_in_room:
                 unallocated_persons.append(person)
-        print (unallocated_persons)
+                file.write(person + "\n")
+                file.write('-------------------------------------------------'+ "\n")
+                file.write(' '+ "\n")
+        file.close()
+
+
+
+    def print_unallocations(self, file_name):
+        '''
+        This functions is used to print all unallocations.
+        The functions calls the unallocations functions which creates the file.
+        This function checks for the correct file output.
+        '''
+        file_type = file_name.split(".")
+        if len(file_type) == 2:
+            if file_type[1] == 'txt':
+                self.unallocations(file_name)
+                return "Unallocated persons printed to :"+file_name
+            else:
+                return 'Invalid file type'
+        else:
+            return 'Invalid file'
+
+
+
+    def allocations(self, file_name):
+        '''
+        This function is used to create an file that has all allocations.
+        This function is later used by print_allocations functions to print all
+        allocated persons.
+        '''
+        # adding person from all rooms to allocation dictionary
+        file = open(file_name, 'w')
+        for room in self.rooms:
+            file.write(room.room_name + "\n")
+            file.write('-------------------------------------------------'+ "\n")
+            file.write(str([person.person_name for person in room.occupants])+ "\n")
+            file.write(' '+ "\n")
+            file.write(' '+ "\n")
+        file.close()
+
+
+    def print_allocations(self, file_name):
+        '''
+        This functions is used to print all allocations.
+        The functions calls the allocations functions which creates the file.
+        This function checks for the correct file output.
+        '''
+        file_type = file_name.split(".")
+        if len(file_type) == 2:
+            if file_type[1] == 'txt':
+                self.allocations(file_name)
+                return 'Allocations printed to :'+file_name
+            else:
+                return 'Invalid file type'
+        else:
+            return 'Invalid file'
+
 
 
     def load_people(self, text_input):
+        '''
+        This functions is used to load the application with persons in a text file.
+        This function checks for the correct file input and call the add_person
+        function to add the persons in the application.
+        '''
         try:
             # Opening the text file
             myfile = open(text_input, 'r')
-        except IOError:
-            return 'Input Error'
-        except OSError:
-            return "OS error"
-        except IndexError:
-            raise 'Invalid file'
+        except:
+            return 'Invalid file'
         else:
             for line in myfile:
                 item = line.split()
                 if len(item) == 4:
                     # adding the person to the system if accomodation is edited
                     self.add_person(item[0], item[1], item[2], item[3])
+                    return 'People loaded succesfully'
                 elif len(item) == 3:
                     # dding the person to the system if accomodation is not edited
                     self.add_person(item[0], item[1], item[2], 'N')
+                    return 'People loaded succesfully'
                 else:
                     return 'Invalid file'
 
 
-
-
     def print_room(self, room_name):
-        """ Printing room function """
+        """
+        This function is used to print a room and its occupants.
+        The function checks if the room exists
+        """
         room_names = [room.room_name for room in self.rooms]
         # cheking if the room exists
         if room_name in room_names:
             selected_room = [room for room in self.rooms if room.room_name == room_name]
             people = [person.person_name for person in selected_room[0].occupants]
-            print(selected_room[0].room_name)
-            print(people)
+            return selected_room[0].room_name + '\n'+str(people)
         else:
-            print ('room doesnt exist')
+            return 'Room does not exist'
 
 
-    def load_database(self):
-        # loading the application with data from the system
-        amity_database = AmityDatabase()
-        allocation_list = amity_database.get_allocations()
-        room_list = amity_database.get_rooms()
-        person_list = amity_database.get_persons()
+    def load_database(self, filename):
+        '''
+        The functions get the data from a database and add the data to the amity system.
+        If the database doesn't exist, it creates a new database. The function queries
+        the database through database functions in the database function files.
+        The function then adds the data to the the amity system through creating
+        rooms in terms of room types and person with regards to person types
+        '''
+        amity = AmityDatabase()
+        people = amity.get_persons(filename)
+        rooms = amity.get_rooms(filename)
+        allocations = amity.get_allocations(filename)
+        all_people_name = [person.person_name for person in self.persons]
+        all_room_name = [room.room_name for room in self.rooms]
 
-        # adding the rooms from the database to the rooms list
-        for key in room_list:
-            room_name = key
-            room_type = room_list[key]
-            self.create_room(room_name, room_type)
+        for person in people:
+            if person not in all_people_name:
+                if people[person] == 'STAFF':
+                    self.persons.append(Staff(person))
+                elif people[person] == 'FELLOW':
+                    self.persons.append(Fellow(person))
 
-        # adding people from the databse to the person list
-        for key in person_list:
-            name = key
-            person_type = person_list[key]
-            if person_type.upper() == 'STAFF':
-                staff = Staff(name)
-                self.persons.append(staff)
-            elif person_type.upper() == 'FELLOW':
-                fellow = Fellow(name)
-                self.persons.append(fellow)
+        for room in rooms:
+            if room not in all_room_name:
+                if rooms[room] == 'OFFICE':
+                    self.rooms.append(Office(room))
+                elif rooms[room] == 'LIVINGSPACE':
+                    self.rooms.append(LivingSpace(room))
 
-        for key in allocation_list:
-            name = key
-            room = allocation_list[key]
-            # getting the person from the pero list
-            allocated_person = [person for person in self.persons if person.person_name == name]
+
+        for request_person in allocations:
+            room = allocations[request_person]
             office = room[0]
             livingspace = room[1]
-            allocated_office = [room for room in self.rooms if room.room_name == office]
-            allocated_livingspace = [room for room in self.rooms if room.room_name == livingspace]
-            # adding person to both office and living space if both file in the database are filled
-            if allocated_livingspace != []:
-                allocated_office[0].occupants.append(Fellow(name))
-                allocated_livingspace[0].occupants.append(Fellow(name))
-            else:
-                # adding the person to the office space only if only office space is filled
-                office = room[0]
+            person_cl = [person for person in self.persons if person.person_name == request_person]
+            if livingspace != '':
                 allocated_office = [room for room in self.rooms if room.room_name == office]
-                allocated_office[0].occupants.append(Fellow(name))
+                persons_in_allocatedoffice = [person.person_name
+                                              for person in allocated_office[0].occupants]
+                allocated_livingspace = [room for room
+                                         in self.rooms if room.room_name == livingspace]
+                persons_in_allocatedlivingspace = [person.person_name
+                                                   for person in allocated_livingspace[0].occupants]
+                if request_person not in persons_in_allocatedoffice:
+                    allocated_office[0].occupants.append(person_cl[0])
+                if request_person not in persons_in_allocatedlivingspace:
+                    allocated_livingspace[0].occupants.append(person_cl[0])
+            else:
+                allocated_office = [room for room in self.rooms if room.room_name == office]
+                persons_in_allocatedoffice = [person.person_name
+                                              for person in allocated_office[0].occupants]
+                if request_person not in persons_in_allocatedoffice:
+                    allocated_office[0].occupants.append(person_cl[0])
 
 
-    def save_database(self):
+    def save_database(self, filename):
+        '''
+        The functions saves the data from a database with data from the amity system.
+        If the database doesn't exist, it creates a new database.
+        The function loads the database through with rooms in terms of room types and
+        person with regards to person types. The function also add the database with the
+        room the person belong to.
+        '''
         amity_database = AmityDatabase()
         all_allocation = {}
 
         # adding person from all rooms to allocation dictionary
         for room in self.rooms:
             for person in room.occupants:
-                all_allocation.update({person.person_name:['', '']})
+                all_allocation.update({person.person_name:[person.person_type, '', '']})
 
         # adding person's office and living space to the all alocation's dictionary
         for room in self.rooms:
             for person in room.occupants:
                 if room.room_type == "OFFICE":
-                    all_allocation[person.person_name][0] = room.room_name
-                elif room.room_type == "LIVING SPACE":
                     all_allocation[person.person_name][1] = room.room_name
+                elif room.room_type == "LIVINGSPACE":
+                    all_allocation[person.person_name][2] = room.room_name
 
         # adding new rooms to database
-        rooms_in_db = amity_database.get_rooms()
+        rooms_in_db = amity_database.get_rooms(filename)
         for room in self.rooms:
             if room.room_name not in rooms_in_db:
-                amity_database.add_room(room.room_name, room.room_type, room.capacity)
+                amity_database.add_room(filename, room.room_name, room.room_type)
 
-        # adding new people in database
-        persons_in_db = amity_database.get_persons()
-        for person in self.persons:
-            if person.person_name not in persons_in_db:
-                amity_database.add_person(person.person_name, person.person_type)
 
         # adding data to the allocations table in database
-        allocations_in_db = amity_database.get_allocations()
+        person_in_db = amity_database.get_allocations(filename)
         for person in all_allocation:
-            if person in allocations_in_db:
-                amity_database.update_allocation(person, all_allocation[person][0],
-                                                 all_allocation[person][1])
+            if person in person_in_db:
+                amity_database.update_person(filename, person,
+                                             all_allocation[person][1], all_allocation[person][2])
             else:
-                amity_database.add_allocation(person, all_allocation[person][0],
-                                              all_allocation[person][1])
+                amity_database.add_person(filename, person, all_allocation[person][0],
+                                          all_allocation[person][1], all_allocation[person][2])
 
-    def save_state(self):
-        try:
-            self.save_database()
-        except:
-            print ('Database Error')
+    def save_state(self, filename):
+        '''
+        The functions saves the data from a database by calling the save_database function.
+        The function checks for the valid data file name and type provided
+        then creates the database if it doesn't exists or updates an existing database
+        '''
+        file_type = filename.split(".")
+        if len(file_type) == 2:
+            if file_type[1] == 'db':
+                self.save_database(filename)
+                return 'State saved'
+            else:
+                return 'Saving state failed. Wrong file type'
         else:
-            print ('System state saved')
+            return 'Saving state failed. File type error'

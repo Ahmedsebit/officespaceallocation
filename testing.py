@@ -9,7 +9,9 @@ class Testing(object):
 
     def save_database(self):
         amity = AmityControls()
-        amity.load_state('amity.db')
+
+        amity.save_state('invalid_file2')
+
 
 
 amity_testing = Testing()
