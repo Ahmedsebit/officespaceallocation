@@ -1,9 +1,7 @@
 """
-This example uses docopt with the built in cmd module to demonstrate an
-interactive command application.
 Usage:
     app load_state <file_name>
-    app create_room <room_type> <room_name>
+    app create_room <room_type> <room_name>....
     app add_person <person_type> <first_name> <last_name> [<want_accomodation>]
     app print_room <room_name>
     app print_unallocations [-o=filename]
@@ -31,10 +29,7 @@ from models.amity_person_models import Person, Fellow, Staff
 
 def docopt_cmd(func):
 
-    """
-    This decorator is used to simplify the try/except block and pass the result
-    of the docopt parsing to the called action.
-    """
+
     def fn(self, arg):
         try:
             opt = docopt(fn.__doc__, arg)
