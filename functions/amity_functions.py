@@ -70,6 +70,7 @@ class AmityControls(object):
         # creating a list of all people names to check if the person already exists
         all_persons_names = [person.person_name for person in self.persons]
         name = first_name+ " "+last_name
+        role = role.upper()
         if name in all_persons_names:
             return 'The person already exists'
         else:
@@ -77,7 +78,7 @@ class AmityControls(object):
                 fellow = Fellow(name)
                 self.persons.append(fellow)
                 self.allocate_office(fellow, fellow.person_type)
-                return fellow.person_name+ ' succesfully added'
+                return fellow.person_name + ' succesfully added'
             elif role.upper() == 'FELLOW' and want_accommodation == 'Y':
                 fellow = Fellow(name)
                 fellow.want_accommodation = 'Y'
@@ -94,11 +95,12 @@ class AmityControls(object):
                 staff = Staff(name)
                 self.persons.append(staff)
                 self.allocate_office(staff, staff.person_type)
-                return staff.person_name+\
-                ' succesfully Added to Office. Cannot allocate staff a livingspace'
+                return staff.person_name+' succesfully Added to Office. Cannot allocate staff a livingspace'
             elif role.upper() != 'STAFF' and role.upper() != 'FELLOW':
                 # if role is not STAFF or FELLOW
                 return 'Invalid role. Person not created'
+            else:
+                return 'Invalid choice'
 
 
 
@@ -127,6 +129,32 @@ class AmityControls(object):
                 return 'Invalid role. Person not created'
 
 
+    def new_allocate_office(self, person_name):
+        '''
+        This function is used to allocate an office.
+        It checks if there is an office, then checks for a random office
+        with a if there is a vacant space.
+        '''
+        offices = [room for room in self.rooms if room.room_type == 'OFFICE']
+        person_in_offices = []
+        # creating a list of all offices with available spaces
+        persons_in_system = [person.person_name for person in self.persons]
+        if person_name in persons_in_system:
+            person = [person for person in self.persons if person.person_name == person_name]
+            for room in offices:
+                for person_in_room in room.occupants:
+                    person_in_offices.append(person_in_room)
+            if person[0] in person_in_offices:
+                return 'Person already allocated an office'
+            else:
+                self.allocate_office(person[0], person[0].person_type)
+                return 'The person has been allocated an office'
+        else:
+            return 'The person does not exist in the system'
+
+
+
+
     def allocate_livingspace(self, person, role):
         '''
         This function is used to allocate an living space.
@@ -135,8 +163,7 @@ class AmityControls(object):
         since STAFF cannot be allocated a living space
         '''
         # creating a list of all offices with available spaces
-        livingspaces = [room for room in self.rooms if room.room_type == 'LIVINGSPACE'
-                        and room.capacity > len(room.occupants)]
+        livingspaces = [room for room in self.rooms if room.room_type == 'LIVINGSPACE']
         # If there is no available space in both office
         if len(livingspaces) == 0:
             return 'No aviallable living space'
@@ -153,6 +180,34 @@ class AmityControls(object):
 
 
 
+    def new_allocate_livingspace(self, person_name):
+        '''
+        This function is used to allocate an office.
+        It checks if there is an office, then checks for a random office
+        with a if there is a vacant space.
+        '''
+        livingspaces = [room for room in self.rooms if room.room_type == 'LIVINGSPACE']
+        person_in_livingspace = []
+        # creating a list of all offices with available spaces
+        persons_in_system = [person.person_name for person in self.persons]
+        if person_name in persons_in_system:
+            person = [person for person in self.persons if person.person_name == person_name]
+            for room in livingspaces:
+                for person_in_room in room.occupants:
+                    person_in_livingspace.append(person_in_room)
+            if person[0] in person_in_livingspace:
+                return 'Person already allocated an office'
+            else:
+                if person[0].person_type == "STAFF":
+                    return 'Staff cannot be allocated a living space'
+                else:
+                    self.allocate_livingspace(person[0], person[0].person_type)
+                    return 'The person has been allocated a living space'
+        else:
+            return 'The person does not exist in the system'
+
+
+
     def reallocate_person(self, fname, lname, room_name):
         '''
         This function is used to reallocate person from a room they belonged to to a
@@ -160,13 +215,14 @@ class AmityControls(object):
         the room and if the room has vacancy.
         '''
         name = fname + " " +lname
+        room_name = room_name.upper()
         all_people_names = [person.person_name for person in self.persons]
         # cheking if person exists
         if name.upper() in all_people_names:
             for room in self.rooms:
                 # getting the rooms the person belong to
                 person_list = [person.person_name for person in room.occupants]
-                input_room = [room for room in self.rooms if room.room_name == room_name.upper()]
+                input_room = [room for room in self.rooms if room.room_name == room_name]
                 if len(input_room) == 0:
                     return 'the room does not exists'
                 else:
@@ -175,20 +231,20 @@ class AmityControls(object):
                     if name in person_list:
                         reallocated_person = [person for person in room.occupants
                                               if person.person_name == name]
-                        if input_room[0].capacity > len(input_room[0].occupants) \
-                        and input_room[0].room_type == room.room_type:
-                            # adding the person to the room
-                            if name in persons_in_inputroom:
-                                return "The person already exists in the room"
+                        if input_room[0].capacity > len(input_room[0].occupants):
+                            if input_room[0].room_type == room.room_type:
+                                # adding the person to the room
+                                if name in persons_in_inputroom:
+                                    return "The person already exists in the room"
+                                else:
+                                    input_room[0].occupants.append(reallocated_person[0])
+                                    # removing the person from the previous room
+                                    room.occupants.remove(reallocated_person[0])
+                                    return reallocated_person[0].person_name+'  was reallocated succesfully from '+room.room_name +' to '+input_room[0].room_name
                             else:
-                                input_room[0].occupants.append(reallocated_person[0])
-                                # removing the person from the previous room
-                                room.occupants.remove(reallocated_person[0])
-                                return reallocated_person[0].person_name+\
-                                '  was reallocated succesfully from '+room.room_name +\
-                                ' to '+input_room[0].room_name
+                                return 'The person was not reallocated. The person has not been allocated this room type'
                         else:
-                            return 'The person was not allocated'
+                            return 'The selected room is full'
         else:
             return 'Person doesnt exist'
 
@@ -203,10 +259,10 @@ class AmityControls(object):
         person_name_list = [person.person_name for person in self.persons]
         person_in_room = []
         unallocated_persons = []
-        # adding person from all rooms to allocation dictionary
         for room in self.rooms:
             for person in room.occupants:
                 person_in_room.append(person.person_name)
+
         file = open(file_name, 'w')
         for person in person_name_list:
             if person not in person_in_room:
@@ -217,6 +273,31 @@ class AmityControls(object):
         file.close()
 
 
+    def list_unallocations(self):
+        '''
+        This function is used to create alist that has all unallocations.
+        '''
+        person_name_list = [person.person_name for person in self.persons]
+        person_in_room = []
+        unallocated_persons = []
+        for room in self.rooms:
+            for person in room.occupants:
+                person_in_room.append(person.person_name)
+
+        for person in person_name_list:
+            if person not in person_in_room:
+                unallocated_persons.append(person)
+
+        if len(person_name_list) == 0:
+            cprint('There are no person in the system', 'yellow')
+        elif len(unallocated_persons) == 0:
+            cprint('Everyone has been allocated a room', 'yellow')
+        else:
+            for person in unallocated_persons:
+                cprint(person, 'green')
+
+
+
 
     def print_unallocations(self, file_name):
         '''
@@ -224,16 +305,56 @@ class AmityControls(object):
         The functions calls the unallocations functions which creates the file.
         This function checks for the correct file output.
         '''
-        file_type = file_name.split(".")
-        if len(file_type) == 2:
-            if file_type[1] == 'txt':
-                self.unallocations(file_name)
-                return "Unallocated persons printed to :"+file_name
-            else:
-                return 'Invalid file type'
-        else:
-            return 'Invalid file'
+        # adding person from all rooms to allocation dictionary
+        person_name_list = [person.person_name for person in self.persons]
+        person_in_room = []
+        unallocated_persons = []
+        for room in self.rooms:
+            for person in room.occupants:
+                person_in_room.append(person.person_name)
 
+        for person in person_name_list:
+            if person not in person_in_room:
+                unallocated_persons.append(person)
+
+        if len(person_name_list) == 0:
+            return 'There are no people in the system'
+        elif len(unallocated_persons) == 0:
+            return 'Every person has been allocated a room'
+        else:
+            file_type = file_name.split(".")
+            if len(file_type) == 2:
+                if file_type[1] == 'txt':
+                    self.unallocations(file_name)
+                    return "Unallocated persons printed to :"+file_name
+                else:
+                    return 'Invalid file type'
+            else:
+                return 'Invalid file'
+
+
+
+    def list_allocations(self):
+        '''
+        This function is used to create an list that has all allocations.
+        '''
+        # adding person from all rooms to allocation dictionary
+        person_name_list = [person.person_name for person in self.persons]
+        person_in_room = []
+        for room in self.rooms:
+            for person in room.occupants:
+                person_in_room.append(person.person_name)
+        if len(person_name_list) == 0:
+            cprint('There are no person in the system', 'yellow')
+        elif len(person_in_room) == 0:
+            cprint('There are no people in the rooms', 'yellow')
+        else:
+            for room in self.rooms:
+                people = [person.person_name for person in room.occupants]
+                cprint(room.room_name,  'green')
+                print ('-------------------------------------------------')
+                cprint(people, 'green')
+                print("")
 
 
     def allocations(self, file_name):
@@ -259,15 +380,26 @@ class AmityControls(object):
         The functions calls the allocations functions which creates the file.
         This function checks for the correct file output.
         '''
-        file_type = file_name.split(".")
-        if len(file_type) == 2:
-            if file_type[1] == 'txt':
-                self.allocations(file_name)
-                return 'Allocations printed to :'+file_name
-            else:
-                return 'Invalid file type'
+        person_name_list = [person.person_name for person in self.persons]
+        person_in_room = []
+        for room in self.rooms:
+            for person in room.occupants:
+                person_in_room.append(person.person_name)
+
+        if len(person_name_list) == 0:
+            return 'There are no person in the system'
+        elif len(person_in_room) == 0:
+            return 'There are no people in the rooms'
         else:
-            return 'Invalid file'
+            file_type = file_name.split(".")
+            if len(file_type) == 2:
+                if file_type[1] == 'txt':
+                    self.allocations(file_name)
+                    return 'Allocations printed to :'+file_name
+                else:
+                    return 'Invalid file type'
+            else:
+                return 'Invalid file'
 
 
 
@@ -288,13 +420,12 @@ class AmityControls(object):
                 if len(item) == 4:
                     # adding the person to the system if accomodation is edited
                     self.add_person(item[0], item[1], item[2], item[3])
-                    return 'People loaded succesfully'
                 elif len(item) == 3:
                     # dding the person to the system if accomodation is not edited
                     self.add_person(item[0], item[1], item[2], 'N')
-                    return 'People loaded succesfully'
                 else:
                     return 'Invalid file'
+            return 'People loaded succesfully'
 
 
     def print_room(self, room_name):

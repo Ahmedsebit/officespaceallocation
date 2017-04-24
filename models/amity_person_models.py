@@ -1,5 +1,5 @@
 class Person(object):
-    """Base class for creating rooms in amity."""
+    """Base class for creating person in amity."""
 
     def __init__(self, person_name, person_type, want_accommodation):
         self.person_name = person_name
@@ -8,7 +8,7 @@ class Person(object):
 
 
 class Fellow(Person):
-    """Creates living spaces and inherits from Room."""
+    """Creates Fellow and inherits from Person"""
 
     def __init__(self, person_name):
         super(Fellow, self).__init__(
@@ -17,7 +17,7 @@ class Fellow(Person):
 
 
 class Staff(Person):
-    """Creates offices and inherits from room."""
+    """Creates Staff and inherits from Person."""
 
     def __init__(self, person_name):
         super(Staff, self).__init__(

@@ -24,9 +24,9 @@ class AmityDatabase(object):
 
     def get_persons(self, filename):
         '''
-        The function get the person from database and add the person to a dictionary
+        The function get the person from database and return a dictionary with all the people
+        in the database
         '''
-        # calling the initialize function to use the specified the database
         self.initialize(filename)
         persons = self.SESSIONS.query(Persons).all()
         person_dictionary = {}
@@ -36,10 +36,9 @@ class AmityDatabase(object):
 
     def get_rooms(self, filename):
         '''
-        The function get the rooms from database and add the rooms to the dictionary with regards
-        to room name and room type to a dictionary
+        The function get the rooms from database and returns a dictionary with the rooms in the
+        database with regards to the room name and room type to a dictionary
         '''
-        # calling the initialize function to use the specified the database
         self.initialize(filename)
         rooms = self.SESSIONS.query(Rooms).all()
         room_dictionary = {}
@@ -49,10 +48,9 @@ class AmityDatabase(object):
 
     def get_allocations(self, filename):
         '''
-        The function get the allocations from database and adds the allocations to the dictionary
-        with regards to person name and person type and the room they belong to into a dictionary.
+        The function get the allocated rooms for each person from database and returns a dictionary
+        with regards to person name and person type and the office and living space
         '''
-        # calling the initialize function to use the specified the database
         self.initialize(filename)
         allocations = self.SESSIONS.query(Persons).all()
         allocations_dictionary = {}
@@ -65,7 +63,6 @@ class AmityDatabase(object):
         '''
         The function is used to add the person to the dictionary
         '''
-        # calling the initialize function to use the specified the database
         self.initialize(filename)
         newperson = Persons(person_name=person_name, person_type=person_type,
                             office_name=office_name, livingspace_name=livingspace_name)
@@ -76,10 +73,9 @@ class AmityDatabase(object):
         '''
         The function is used to add the rooms to the dictionary
         '''
-        # calling the initialize function to use the specified the database
         self.initialize(filename)
-        newuser = Rooms(room_name=room_name, room_type=room_type)
-        self.SESSIONS.add(newuser)
+        newroom = Rooms(room_name=room_name, room_type=room_type)
+        self.SESSIONS.add(newroom)
         self.SESSIONS.commit()
 
 
@@ -87,7 +83,6 @@ class AmityDatabase(object):
         '''
         The function is used to add the person to the dictionary
         '''
-        # calling the initialize function to use the specified the database
         self.initialize(filename)
         reallocation = self.SESSIONS.query(Persons).filter_by(person_name=person_name).one()
         reallocation.office_name = office_name
