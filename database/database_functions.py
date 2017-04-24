@@ -1,64 +1,91 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from database_models import Persons, Rooms, Allocations, BASE
-
-ENGINE = create_engine('sqlite:///amity.db')
-
-BASE.metadata.create_all(ENGINE)
-DBSESSION = sessionmaker(bind=ENGINE)
-SESSIONS = DBSESSION()
-
-def get_persons():
-    persons = SESSIONS.query(Persons).all()
-    p_dct = {}
-    for person in persons:
-        p_dct.update({person.p_name:person.p_type})
-
-    return p_dct
-
-def get_rooms():
-    rooms = SESSIONS.query(Rooms).all()
-    r_dct = {}
-    for room in rooms:
-        r_dct.update({room.r_name:room.r_type})
-
-    return r_dct
-
-def get_allocations():
-    allocations = SESSIONS.query(Allocations).all()
-    al_dct = {}
-    for allocation in allocations:
-        al_dct.update({allocation.p_name:[allocation.o_name, allocation.ls_name]})
-
-    return al_dct
+from database.database_models import Persons, Rooms, BASE
 
 
-def add_person(person_name, person_type):
-    ''' Adding a person to database'''
-    newperson = Persons(p_name=person_name, p_type=person_type)
-    SESSIONS.add(newperson)
-    SESSIONS.commit()
 
-def add_room(room_name, room_type, room_capacity):
-    ''' Adding a room to database'''
-    newuser = Rooms(r_name=room_name, r_type=room_type, r_capacity=room_capacity)
-    SESSIONS.add(newuser)
-    SESSIONS.commit()
+class AmityDatabase(object):
 
-def allocate_room(room_name, person_type):
-    ''' Adding a person to database'''
-    newallocation = sessions.query(Rooms).filter_by(r_name = room_name).one()
-    newallocation.r_occupied +=1
-    SESSIONS.add(newpallocation)
-    SESSIONS.commit()
+    '''
+    class contains function for the database
+    '''
 
-def add_allocation(person_name, office_name, livingspace_name):
-    ''' Updating allocations table '''
-    new_allocation = Allocations(p_name=person_name, o_name=office_name, ls_name=livingspace_name)
-    SESSIONS.add(new_allocation)
-    SESSIONS.commit()
+    def __init__(self):
+        pass
 
-def edit_allocation(p_name, office_name, livingspaces_name):
-    relocation = sessions.query(Rooms).filter_by(p_name = p_name).one()
-    relocation.o_name = office_name
-    relocation.ls_name = livingspaces_name
+    def initialize(self, filename):
+        '''
+        The function initaializes the database through a new databse or an existing database.
+        '''
+        self.ENGINE = create_engine('sqlite:///'+filename)
+        BASE.metadata.create_all(self.ENGINE)
+        self.DBSESSION = sessionmaker(bind=self.ENGINE)
+        self.SESSIONS = self.DBSESSION()
+
+    def get_persons(self, filename):
+        '''
+        The function get the person from database and return a dictionary with all the people
+        in the database
+        '''
+        self.initialize(filename)
+        persons = self.SESSIONS.query(Persons).all()
+        person_dictionary = {}
+        for person in persons:
+            person_dictionary.update({person.person_name:person.person_type})
+        return person_dictionary
+
+    def get_rooms(self, filename):
+        '''
+        The function get the rooms from database and returns a dictionary with the rooms in the
+        database with regards to the room name and room type to a dictionary
+        '''
+        self.initialize(filename)
+        rooms = self.SESSIONS.query(Rooms).all()
+        room_dictionary = {}
+        for room in rooms:
+            room_dictionary.update({room.room_name:room.room_type})
+        return room_dictionary
+
+    def get_allocations(self, filename):
+        '''
+        The function get the allocated rooms for each person from database and returns a dictionary
+        with regards to person name and person type and the office and living space
+        '''
+        self.initialize(filename)
+        allocations = self.SESSIONS.query(Persons).all()
+        allocations_dictionary = {}
+        for allocation in allocations:
+            allocations_dictionary.update({allocation.person_name:[allocation.office_name,
+                                                                   allocation.livingspace_name]})
+        return allocations_dictionary
+
+    def add_person(self, filename, person_name, person_type, office_name, livingspace_name):
+        '''
+        The function is used to add the person to the dictionary
+        '''
+        self.initialize(filename)
+        newperson = Persons(person_name=person_name, person_type=person_type,
+                            office_name=office_name, livingspace_name=livingspace_name)
+        self.SESSIONS.add(newperson)
+        self.SESSIONS.commit()
+
+    def add_room(self, filename, room_name, room_type):
+        '''
+        The function is used to add the rooms to the dictionary
+        '''
+        self.initialize(filename)
+        newroom = Rooms(room_name=room_name, room_type=room_type)
+        self.SESSIONS.add(newroom)
+        self.SESSIONS.commit()
+
+
+    def update_person(self, filename, person_name, office_name, livingspaces_name):
+        '''
+        The function is used to add the person to the dictionary
+        '''
+        self.initialize(filename)
+        reallocation = self.SESSIONS.query(Persons).filter_by(person_name=person_name).one()
+        reallocation.office_name = office_name
+        reallocation.livingspace_name = livingspaces_name
+        self.SESSIONS.add(reallocation)
+        self.SESSIONS.commit()

@@ -1,0 +1,2 @@
+[run]
+omit = *sqlalchemy*, *termcolor*, *database.py*, *numbers.py*, *decimal.py*, *sqlite3*

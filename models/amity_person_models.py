@@ -1,24 +1,24 @@
 class Person(object):
-    """Base class for creating rooms in amity."""
+    """Base class for creating person in amity."""
 
-    def __init__(self, person_name, person_type, accomodation):
+    def __init__(self, person_name, person_type, want_accommodation):
         self.person_name = person_name
         self.person_type = person_type
-        self.accomodation = accomodation
+        self.want_accommodation = want_accommodation
 
 
 class Fellow(Person):
-    """Creates living spaces and inherits from Room."""
+    """Creates Fellow and inherits from Person"""
 
     def __init__(self, person_name):
         super(Fellow, self).__init__(
-            person_name, person_type="Fellow", accomodation='N')
+            person_name, person_type="FELLOW", want_accommodation='N')
 
 
 
 class Staff(Person):
-    """Creates offices and inherits from room."""
+    """Creates Staff and inherits from Person."""
 
     def __init__(self, person_name):
         super(Staff, self).__init__(
-            person_name, person_type="Staff", accomodation='N')
+            person_name, person_type="STAFF", want_accommodation='N')

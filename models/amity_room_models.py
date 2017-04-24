@@ -13,7 +13,7 @@ class LivingSpace(Room):
 
     def __init__(self, room_name):
         super(LivingSpace, self).__init__(
-            room_name, room_type="LIVING SPACE", capacity=4, occupants=[])
+            room_name, room_type="LIVINGSPACE", capacity=4, occupants=[])
 
 
 

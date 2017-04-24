@@ -2,7 +2,9 @@
 import unittest
 from unittest import TestCase
 from functions.amity_functions import AmityControls
-from models.amity_models import Amity, Fellow, Staff
+from models.amity_models import Amity
+from models.amity_person_models import Staff, Fellow
+from models.amity_room_models import Office, LivingSpace
 
 
 class AmityControlTest(TestCase):
@@ -15,151 +17,239 @@ class AmityControlTest(TestCase):
     def test_load_state(self):
         '''
         Function to check if application has been loaded with data from the database
-        True - if data has been loaded (Anity dictionary has items loaded to it)
-        False and fails - if data hasn't been loaded
         '''
-        self.assertEqual(self.amity.load_state(), 'System loaded')
+        self.assertEqual(self.amity.load_state('amity.db'), 'Loading state succesfull')
+
+    def test_invalidfile_load_state(self):
+        '''
+        Function to check if application has been loaded with invalid data file
+        '''
+        self.assertEqual(self.amity.load_state('invalid_file'), 'Loading state failed. File type error')
+
+    def test_invalidfiletype_load_state(self):
+        '''
+        Function to check if application has been loaded with invalid data type faile
+        '''
+        self.assertEqual(self.amity.load_state('invalid_file.txt'), 'Loading state failed. Wrong file type')
 
 
-    def test_createroom(self):
+    def test_create_room_office(self):
         '''
-        Function to check for succesfull room creation
-        True - If room is created (Length of room increments by 1)
-        False & Fails - If room creation fails (Length of room remains the same)
+        Function to check for succesful office creation
         '''
         self.assertEqual(self.amity.create_room('London', 'OFFICE'),
-                         'Room succefully created')
+                         'LONDON office succesfully created')
+
+    def test_create_room_livingspace(self):
+        '''
+        Function to check for succesful living space creation
+        '''
+        self.assertEqual(self.amity.create_room('PHP', 'LIVINGSPACE'),
+                         'PHP living space succesfully created')
 
 
-    def test_createroom_room_exists(self):
+    def test_create_room_existing(self):
         '''
         Function to check if room exists in rooms list
-        False & Fails - If room doest exists
         '''
         self.amity.create_room('London', 'OFFICE')
         self.assertEqual(self.amity.create_room('London', 'OFFICE'),
-                         'Room already exists')
+                         'Room exists')
 
 
     def test_create_room_invalid_roomtype(self):
         '''
-        Function for checking the created room type
-        False and Fails if the room type is not 'Office' of 'Living Space'
+        Function for checking the wrong room type
         '''
-        self.assertEqual(self.amity.create_room('Adis Ababa', 'Staff'),
-                         'Invalid room type, Should be OFFICE or LIVING SPACE')
+        self.assertEqual(self.amity.create_room('AdisAbaba', 'Staff'),
+                         'Invalid room type')
 
 
     def test_add_person_person_exist(self):
         '''
-        Function for checking if person exists
-        False and Fails - If person doesnt exists
+        Function for checking if person already exists
         '''
         self.amity.add_person('Timothy', 'Ngugi', 'FELLOW', 'Y')
         self.assertEqual(self.amity.add_person('Timothy', 'Ngugi', 'FELLOW', 'Y'),
                          'The person already exists')
 
 
-    def test_add_person(self):
+    def test_add_person_fellow(self):
         '''
-        Function for checking succesfull person creation
-        True - If person is created (Length of room dcitionary increments by 1)
-        False & Fails - If person creation fails (Length of room remains the same)
+        Function for checking succesful person creation
         '''
         self.assertEqual(self.amity.add_person('Timothy', 'Ngugi', 'FELLOW', 'Y'),
-                         'Person Succesfully Added')
+                         'Timothy Ngugi succesfully added')
 
 
     def test_add_person_invalid_persontype(self):
         '''
-        Function for checking for person type
-        Fails if the person type is not 'Fellow' of 'Staff'
+        Function for checking for wrong person type
         '''
         self.amity.add_person('Timothy', 'Ngugi', 'FELLO', 'Y')
         self.assertEqual(self.amity.add_person('Timothy', 'Ngugi', 'FELLO', 'Y'),
-                         'Wrong person type, should be FELLOW or STAFF')
+                         'Invalid role. Person not created')
 
 
-    def test_allocate_room_fellowall(self):
+    def test_fellow_room_allocation(self):
         '''
-        Function for checking succesfull all rooms allocation
-        True - If person is succesfully allocated (Length of allocation dictionary increments by 1)
-        False & Fails - If allocation fails (Length of allocation dictionary  remains the same)
+        Function for checking succesful al rooms allocation
         '''
-        self.assertEqual(self.amity.allocate_room('Ahmed Yusuf', 'FELLOW', 'Y'),
-                         'Office and Living Space succesfully allocated')
+        self.amity.create_room('London', 'OFFICE')
+        self.amity.create_room('SWIFT', 'LIVINGSPACE')
+        self.amity.add_person('Ahmed Yusuf', 'FELLOW', 'Y')
+        self.assertEqual(self.amity.add_person('Ahmed', 'Yusuf', 'FELLOW', 'Y'),
+                         'Ahmed Yusuf succesfully added')
 
 
-    def test_allocate_room_fellowoffice(self):
+    def test_add_person_staff(self):
         '''
-        Function for checking succesfull office allocation
-        True - If person is succesfully allocated (Length of allocation dictionary increments by 1)
-        False & Fails - If allocation fails (Length of allocation dictionary  remains the same)
+        Function for staff addition
         '''
-        self.assertEqual(self.amity.allocate_room('Ahmed Yusuf', 'FELLOW', 'N'),
-                         'Office succesfully allocated')
+        self.assertEqual(self.amity.add_person('T', 'S', 'STAFF', 'N'),
+                         'T S succesfully added')
 
 
-    def test_allocate_room_staff(self):
-        '''
-        Function for checking allocation to staff
-        True - If Staff is not allocated a living spce
-        Fails - if Staff is allocated a living space
-        '''
-        self.assertEqual(self.amity.allocate_room('T S', 'STAFF', 'N'),
-                         'STAFF succesfully allocated')
-
-
-    def test_allocate_room_stafflivingspace(self):
+    def test_staff_livingspace_allocation(self):
         '''
         Function for checking living space allocation to staff
-        True - If Staff is not allocated a living spce
-        Fails - if Staff is allocated a living space
         '''
-        self.assertEqual(self.amity.allocate_room('T S', 'STAFF', 'Y'),
-                         'Office Succesfully allocated. Cannot allocate staff a living space')
+        self.amity.create_room('London', 'OFFICE')
+        self.amity.create_room('SWIFT', 'LIVINGSPACE')
+        self.assertEqual(self.amity.add_person('T', 'S', 'STAFF', 'Y'),
+                         'T S succesfully Added to Office. Cannot allocate staff a livingspace')
 
 
     def test_reallocate_office(self):
         '''
-        Function for checking for succesfull room relocation
-        True - If relocation is succesful (The name of the allocated room changes)
-        False and Fails - If relocation fails (The name of the allocated room remains the same)
+        Function for checking for succesful room relocation
         '''
-        self.amity.add_person('A', 'Y', 'FELLOW', 'Y')
-        self.assertEqual(self.amity.relocate_office('A', 'Y', 'OFFICE', 'OfficeThree'),
-                         'Relocation succesful')
+        self.amity.create_room('London', 'OFFICE')
+        self.amity.add_person('A', 'Y', 'FELLOW')
+        self.amity.create_room('Kinshasa', 'OFFICE')
+        self.assertEqual(self.amity.reallocate_person('A', 'Y', 'KINSHASA'),
+                         'A Y  was reallocated succesfully from LONDON to KINSHASA')
+
+    def test_reallocate_office_exists(self):
+        '''
+        Function for checking for reallocation to same room
+        '''
+        self.amity.create_room('Kinshasa', 'OFFICE')
+        self.amity.add_person('A', 'Y', 'FELLOW')
+        self.assertEqual(self.amity.reallocate_person('A', 'Y', 'KINSHASA'),
+                         'The person already exists in the room')
 
 
     def test_load_people_succefull(self):
         '''
         Function for checking loading persons from text files
-        True - If allocations dictionary length increases by number of lines in the text files
-        False and Fails - If dictionary length doesn't increase by number of lines in the text files
         '''
         self.assertEqual(self.amity.load_people('person.txt'),
-                         'Loading succesful')
+                         'People loaded succesfully')
 
     def test_load_people_invalidfile(self):
         '''
-        Function for checking loading persons from text files
-        True - If allocations dictionary length increases by number of lines in the text files
-        False and Fails - If dictionary length doesn't increase by number of lines in the text files
+        Function for checking loading persons from invalid text file
         '''
-        with self.assertRaises(IndexError):
-            self.amity.load_people('person_invalid.txt')
+        self.assertEqual(self.amity.load_people('person_invalid.txt'),
+                         'Invalid file')
 
 
     def test_load_people_nofile(self):
         '''
-        Function for checking loading persons from text files
-        True - If allocations dictionary length increases by number of lines in the text files
-        False and Fails - If dictionary length doesn't increase by number of lines in the text files
+        Function for checking loading persons from non existing text files
         '''
-        with self.assertRaises(IOError):
-            self.amity.load_people('person_notexisting.txt')
+        self.assertEqual(self.amity.load_people('person_notexisting.txt'),
+                         'Invalid file')
 
 
+    def test_save_state(self):
+        '''
+        Function to check if application has been loaded with data from the database
+        '''
+        self.assertEqual(self.amity.save_state('amity.db'), 'State saved')
+
+    def test_print_unallocations(self):
+        '''
+        Function to check if application has been loaded with invalid data type
+        '''
+        self.amity.add_person('AHmed', 'Yusuf', 'Fellow')
+        self.assertEqual(self.amity.print_unallocations('amity.txt'), 'Unallocated persons printed to :amity.txt')
+
+    def test_print_unallocations_invalidfilename(self):
+        '''
+        Function to check if application has been loaded with in valid data type
+        '''
+        self.amity.add_person('AHmed', 'Yusuf', 'Fellow')
+        self.assertEqual(self.amity.print_unallocations('amity'), 'Invalid file')
+
+    def test_print_unallocations_invalidfiletype(self):
+        '''
+        Function to check if unallocated people have been printed to an invalid data type
+        '''
+        self.amity.add_person('AHmed', 'Yusuf', 'Fellow')
+        self.assertEqual(self.amity.print_unallocations('amity.db'), 'Invalid file type')
+
+    def test_print_allocations(self):
+        '''
+        Function to check if unallocated people have been printed to an valid data file
+        '''
+        self.amity.create_room('LONDON', 'OFFICE')
+        self.amity.add_person('AHmed', 'Yusuf', 'Fellow')
+        self.assertEqual(self.amity.print_allocations('amity.txt'), 'Allocations printed to :amity.txt')
+
+    def test_print_allocations_invalidfilename(self):
+        '''
+        self.amity.create_room('LONDON', 'OFFICE')
+        self.amity.add_person('AHmed', 'Yusuf', 'Fellow')
+        Function to check if unallocated people have been printed to an invalid data file
+        '''
+
+        self.amity.create_room('LONDON', 'OFFICE')
+        self.amity.add_person('AHmed', 'Yusuf', 'Fellow')
+        self.assertEqual(self.amity.print_allocations('amity'), 'Invalid file')
+
+    def test_print_allocations_invalidfiletype(self):
+        '''
+        Function to check if allocated people have been printed to an invalid data type
+        '''
+
+        self.amity.create_room('LONDON', 'OFFICE')
+        self.amity.add_person('AHmed', 'Yusuf', 'Fellow')
+        self.assertEqual(self.amity.print_allocations('amity.db'), 'Invalid file type')
+
+    def test_print_room(self):
+        '''
+        Function to check if printing a room and the occupants was succesful
+        '''
+        self.amity.create_room('London', 'OFFICE')
+        self.amity.add_person('A', 'Y', 'FELLOW')
+        self.assertEqual(self.amity.print_room('LONDON'), 'LONDON'+"\n"
+                         +"['A Y']")
+    def test_empty_print_room(self):
+        '''
+        Function to check for printing a room with no occupants
+        '''
+        self.amity.create_room('London', 'OFFICE')
+        self.assertEqual(self.amity.print_room('LONDON'), 'LONDON'+"\n"+"[]")
+
+    def test_print_room_notexisting(self):
+        '''
+        Function to check for printing ocupants for a non-existing room
+        '''
+        self.assertEqual(self.amity.print_room('LONDON'), 'Room does not exist')
+
+    def test_invalidfile_save_state(self):
+        '''
+        Function to check if application has been saved to an invaid file
+        '''
+        self.assertEqual(self.amity.save_state('invalid_file'), 'Saving state failed. File type error')
+
+    def test_invalidfiletype_save_state(self):
+        '''
+        Function to check if application has been saved to an invalid file type
+        '''
+        self.assertEqual(self.amity.save_state('invalid_file.txt'), 'Saving state failed. Wrong file type')
 
 if __name__ == '__main__':
     unittest.main()
